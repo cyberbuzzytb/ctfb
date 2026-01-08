@@ -24,16 +24,13 @@
       text-align: center;
       padding: 60px 80px;
       border: 1px solid rgba(245,230,179,0.3);
-      box-shadow:
-        0 0 30px rgba(245,230,179,0.15),
-        inset 0 0 40px rgba(245,230,179,0.05);
+      box-shadow: 0 0 30px rgba(245,230,179,0.15),
+                  inset 0 0 40px rgba(245,230,179,0.05);
       backdrop-filter: blur(4px);
-      background: linear-gradient(
-        145deg,
-        rgba(255,255,255,0.03),
-        rgba(0,0,0,0.6)
-      );
+      background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(0,0,0,0.6));
       animation: fadeIn 2s ease forwards;
+      position: relative;
+      max-width: 700px;
     }
 
     h1 {
@@ -72,18 +69,60 @@
       color: #cbbf95;
     }
 
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .hidden-content {
+      margin-top: 40px;
+      display: none;
     }
 
-    /* subtle floating light particles */
+    .card.unlocked .hidden-content {
+      display: block;
+    }
+
+    /* TERMINAL */
+
+    .terminal {
+      margin-top: 30px;
+      padding: 16px;
+      background: #050505;
+      border: 1px solid rgba(245,230,179,0.25);
+      font-family: monospace;
+      color: #e8d28a;
+      text-align: left;
+    }
+
+    .terminal-output {
+      max-height: 240px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+
+    .terminal-output div {
+      margin: 4px 0;
+    }
+
+    .terminal-input {
+      display: flex;
+      align-items: center;
+    }
+
+    .terminal-input span {
+      margin-right: 6px;
+    }
+
+    .terminal-input input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #f5e6b3;
+      width: 100%;
+      font-family: monospace;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .particle {
       position: absolute;
       width: 2px;
@@ -93,50 +132,163 @@
     }
 
     @keyframes floatUp {
-      from {
-        transform: translateY(100vh);
-        opacity: 0;
-      }
+      from { transform: translateY(100vh); opacity: 0; }
       10% { opacity: 1; }
-      to {
-        transform: translateY(-10vh);
-        opacity: 0;
-      }
+      to { transform: translateY(-10vh); opacity: 0; }
     }
   </style>
 </head>
 <body>
 
-  <!-- particles -->
-  <script>
-    for (let i = 0; i < 40; i++) {
-      const p = document.createElement('div');
-      p.className = 'particle';
-      p.style.left = Math.random() * 100 + 'vw';
-      p.style.animationDuration = (6 + Math.random() * 6) + 's';
-      p.style.animationDelay = Math.random() * 5 + 's';
-      document.body.appendChild(p);
-    }
-  </script>
+<script>
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement("div");
+    p.className = "particle";
+    p.style.left = Math.random() * 100 + "vw";
+    p.style.animationDuration = (6 + Math.random() * 6) + "s";
+    p.style.animationDelay = Math.random() * 5 + "s";
+    document.body.appendChild(p);
+  }
+</script>
 
-  <div class="card">
-    <h1>Advanced Happy Birthday</h1>
-    <h2>Karthik</h2>
+<div class="card">
+  <h1>Advanced Happy Birthday</h1>
+  <h2>Karthik</h2>
 
-    <div class="divider"></div>
+  <div class="divider"></div>
 
-    <p>
-      You didn’t stumble onto this.  
-      You decoded it, reconstructed it, and earned your way here.
-      <br><br>
-      May this year bring sharper ideas, stronger wins,
-      and fewer bugs in both code and life.
-    </p>
+  <p>
+    You didn’t stumble onto this.<br>
+    You decoded it, reconstructed it, and earned your way here.
+    <br><br>
+    May this year bring sharper ideas, stronger wins,
+    and fewer bugs in both code and life.
+  </p>
 
-    <div class="signature">
-      — From someone who knew you’d solve it
+  <div class="signature">— From someone who knew you’d solve it</div>
+
+  <div class="hidden-content">
+    <div class="terminal">
+      <div class="terminal-output" id="output">
+        <div>> type 'start' to begin</div>
+      </div>
+      <div class="terminal-input">
+        <span>&gt;</span>
+        <input id="input" autocomplete="off">
+      </div>
     </div>
   </div>
+</div>
+
+<script>
+/* SECRET KEY PATTERN */
+const secretCode = [
+  "arrowup","arrowdown",
+  "arrowup","arrowdown",
+  "arrowleft","arrowright",
+  "arrowleft","arrowright",
+  "k","b"
+];
+
+let codeIndex = 0;
+
+window.addEventListener("keydown", e => {
+  const key = e.key.toLowerCase();
+
+  if (key === secretCode[codeIndex]) {
+    codeIndex++;
+    if (codeIndex === secretCode.length) {
+      document.querySelector(".card").classList.add("unlocked");
+      document.getElementById("input").focus();
+      codeIndex = 0;
+    }
+  } else {
+    codeIndex = 0;
+  }
+});
+
+/* TERMINAL LOGIC */
+const output = document.getElementById("output");
+const input = document.getElementById("input");
+
+let step = 0;
+let choice = null;
+
+const convo = [
+  {
+    expect: ["start"],
+    reply: [
+      "woah. you actually did it.",
+      "type 'this was good' or 'this was boring'"
+    ]
+  },
+  {
+    expect: ["this was good", "this was boring"],
+    onMatch: (value) => {
+      choice = value;
+      return value === "this was good"
+        ? ["correct answer.", "validation accepted.", "type 'continue'"]
+        : ["bold choice.", "honesty noted.", "type 'continue'"];
+    }
+  },
+  {
+    expect: ["continue"],
+    reply: ["still here?", "interesting.", "type 'why'"]
+  },
+  {
+    expect: ["why"],
+    reply: ["because curiosity wins.", "type 'next'"]
+  },
+  {
+    expect: ["next"],
+    reply: ["this is intentional.", "every line.", "type 'finish'"]
+  },
+  {
+    expect: ["finish"],
+    reply: [
+      "happy birthday, karthik.",
+      "you earned this.",
+      "— end of transmission —"
+    ],
+    end: true
+  }
+];
+
+function print(lines) {
+  lines.forEach(line => {
+    const d = document.createElement("div");
+    d.textContent = "> " + line;
+    output.appendChild(d);
+  });
+  output.scrollTop = output.scrollHeight;
+}
+
+input.addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+
+  const value = input.value.trim().toLowerCase();
+  input.value = "";
+
+  const echo = document.createElement("div");
+  echo.textContent = "> " + value;
+  output.appendChild(echo);
+
+  const current = convo[step];
+
+  if (current.expect.includes(value)) {
+    const response = current.onMatch
+      ? current.onMatch(value)
+      : current.reply;
+
+    print(response);
+    step++;
+
+    if (current.end) input.disabled = true;
+  } else {
+    print(["try what was suggested."]);
+  }
+});
+</script>
 
 </body>
 </html>
